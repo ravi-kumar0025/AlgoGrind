@@ -4,11 +4,10 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { motion } from "framer-motion";
-import { FiMail, FiLock, FiArrowRight } from "react-icons/fi";
+import { FiMail, FiLock, FiArrowRight, FiEye, FiEyeOff } from "react-icons/fi";
 import { FcGoogle } from "react-icons/fc";
 import { FaGithub } from "react-icons/fa";
 import { useState } from "react";
-import { FiEye, FiEyeOff } from "react-icons/fi";
 
 
 export default function LoginForm() {
@@ -42,7 +41,7 @@ export default function LoginForm() {
                 <div className="space-y-2">
                     <div className="flex justify-between">
                         <label className="text-sm font-semibold tracking-widest uppercase text-zinc-500">Password</label>
-                        <Link href="/auth/forgot" className="text-sm text-indigo-600 hover:text-indigo-700 font-medium">
+                        <Link href="/auth/forgot-password" className="text-sm text-indigo-600 hover:text-indigo-700 font-medium">
                             Forgot Password?
                         </Link>
                     </div>
