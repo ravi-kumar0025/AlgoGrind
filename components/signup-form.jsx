@@ -8,7 +8,7 @@ import { FiUser, FiMail, FiLock, FiArrowRight, FiEye, FiEyeOff } from "react-ico
 import { FcGoogle } from "react-icons/fc";
 import { FaGithub } from "react-icons/fa";
 import { useState } from "react";
-import { signIn, signUp, useSession, logOut } from "../lib/auth-client"
+import { signIn, signUp, useSession } from "../lib/auth-client"
 import { toast } from "sonner";
 import { sendOTP } from "../utils/sendOtp.js"
 import { verifyOTP } from "../utils/verifyOtp.js"
@@ -60,10 +60,23 @@ export default function SignupForm() {
             return;
         }
 
-
         try {
             setIsLoading(true);
-            await sendOTP(email, "email-verification")
+            
+            // Create user first
+            const { data, error } = await signUp.email({
+                name,
+                email,
+                password,
+            });
+
+            if (error) {
+                toast.error(error.message || "Failed to sign up");
+                return;
+            }
+
+            // User created successfully, now send OTP for verification
+            await sendOTP(email, "email-verification");
 
             setPendingUser({
                 name,
@@ -71,9 +84,9 @@ export default function SignupForm() {
                 password,
             });
             setStep("otp");
-            toast.success("OTP sent");
+            toast.success("Verification code sent to your email");
         } catch (error) {
-            toast.error(error?.message || "Failed to send OTP");
+            toast.error(error?.message || "Failed to send verification code");
         } finally {
             setIsLoading(false);
         }
@@ -83,26 +96,20 @@ export default function SignupForm() {
         try {
             setIsLoading(true);
 
+            // Verify the OTP and activate the session
             await verifyOTP(email, otp);
 
-            const { error } = await signUp.email({
-                name: pendingUser.name,
-                email: pendingUser.email,
-                password: pendingUser.password,
-            });
-
-            if (error) {
-                toast.error(error.message);
-                return;
-            }
-
-            toast.success("Account created successfully");
+            toast.success("Account created and verified successfully!");
+            
+            // Redirect to dashboard
+            setTimeout(() => {
+                window.location.href = "/dashboard";
+            }, 1000);
         } catch (error) {
             toast.error(error?.message || "Invalid OTP");
         } finally {
             setIsLoading(false);
         }
-
     };
 
     return (
@@ -266,13 +273,33 @@ export default function SignupForm() {
                         isLoading={isLoading}
                     />
 
-                    <button
-                        type="button"
-                        onClick={() => setStep("form")}
-                        className="text-sm text-indigo-600 hover:text-indigo-700"
-                    >
-                        Change Email
-                    </button>
+                    <div className="flex items-center justify-between text-sm">
+                        <button
+                            type="button"
+                            onClick={async () => {
+                                try {
+                                    setIsLoading(true);
+                                    await sendOTP(email, "email-verification");
+                                    toast.success("New code sent!");
+                                } catch (err) {
+                                    toast.error(err?.message || "Failed to resend code");
+                                } finally {
+                                    setIsLoading(false);
+                                }
+                            }}
+                            disabled={isLoading}
+                            className="text-indigo-600 hover:text-indigo-700 disabled:opacity-50"
+                        >
+                            Resend Code
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setStep("form")}
+                            className="text-zinc-500 hover:text-zinc-700"
+                        >
+                            Change Email
+                        </button>
+                    </div>
                 </motion.div>
             )}
         </>

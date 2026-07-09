@@ -1,34 +1,89 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { FiLock, FiArrowLeft, FiCheckCircle } from "react-icons/fi";
+import { FiLock, FiEye, FiEyeOff, FiCheckCircle } from "react-icons/fi";
 import Link from "next/link";
+import { emailOtp } from "@/lib/auth-client";
+import { toast } from "sonner";
 
 export default function ResetPasswordForm() {
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirm, setShowConfirm] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
+    const [resetEmail, setResetEmail] = useState("");
+    const [resetOtp, setResetOtp] = useState("");
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        if (password !== confirmPassword) {
-            alert("Passwords do not match");
+    useEffect(() => {
+        // Retrieve the verified email and OTP passed from the forgot-password flow
+        const email = sessionStorage.getItem("reset_email");
+        const otp = sessionStorage.getItem("reset_otp");
+
+        if (!email || !otp) {
+            toast.error("Invalid session. Please restart the password reset flow.");
+            setTimeout(() => {
+                window.location.href = "/auth/forgot-password";
+            }, 2000);
             return;
         }
 
-        setIsLoading(true);
-        await new Promise(resolve => setTimeout(resolve, 1400));
+        setResetEmail(email);
+        setResetOtp(otp);
+    }, []);
 
-        setIsSuccess(true);
-        setIsLoading(false);
+    const handleSubmit = async (e) => {
+        e.preventDefault();
 
-        setTimeout(() => {
-            window.location.href = "/auth/login";
-        }, 2000);
+        if (password !== confirmPassword) {
+            toast.error("Passwords do not match");
+            return;
+        }
+
+        if (password.length < 8) {
+            toast.error("Password must be at least 8 characters");
+            return;
+        }
+
+        if (!resetEmail || !resetOtp) {
+            toast.error("Session expired. Please restart the password reset.");
+            window.location.href = "/auth/forgot-password";
+            return;
+        }
+
+        try {
+            setIsLoading(true);
+            // Official Better Auth method for resetting password with OTP
+            const { error } = await emailOtp.resetPassword({
+                email: resetEmail,
+                otp: resetOtp,
+                password,
+            });
+
+            if (error) {
+                toast.error(error.message || "Failed to reset password. The code may have expired.");
+                return;
+            }
+
+            // Clear session storage after successful reset
+            sessionStorage.removeItem("reset_email");
+            sessionStorage.removeItem("reset_otp");
+
+            setIsSuccess(true);
+            toast.success("Password reset successfully!");
+
+            setTimeout(() => {
+                window.location.href = "/auth/login";
+            }, 2000);
+        } catch (err) {
+            toast.error(err?.message || "Something went wrong. Please try again.");
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -59,13 +114,21 @@ export default function ResetPasswordForm() {
                                 <div className="relative">
                                     <FiLock className="absolute left-4 top-4 text-zinc-400" size={20} />
                                     <Input
-                                        type="password"
+                                        type={showPassword ? "text" : "password"}
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
                                         placeholder="••••••••"
-                                        className="h-14 pl-12 text-base rounded-2xl border-zinc-200 focus:border-indigo-500"
+                                        className="h-14 pl-12 pr-12 text-base rounded-2xl border-zinc-200 focus:border-indigo-500"
                                         required
+                                        minLength={8}
                                     />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 transition-colors"
+                                    >
+                                        {showPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
+                                    </button>
                                 </div>
                             </div>
 
@@ -74,13 +137,20 @@ export default function ResetPasswordForm() {
                                 <div className="relative">
                                     <FiLock className="absolute left-4 top-4 text-zinc-400" size={20} />
                                     <Input
-                                        type="password"
+                                        type={showConfirm ? "text" : "password"}
                                         value={confirmPassword}
                                         onChange={(e) => setConfirmPassword(e.target.value)}
                                         placeholder="••••••••"
-                                        className="h-14 pl-12 text-base rounded-2xl border-zinc-200 focus:border-indigo-500"
+                                        className="h-14 pl-12 pr-12 text-base rounded-2xl border-zinc-200 focus:border-indigo-500"
                                         required
                                     />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowConfirm(!showConfirm)}
+                                        className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 transition-colors"
+                                    >
+                                        {showConfirm ? <FiEyeOff size={20} /> : <FiEye size={20} />}
+                                    </button>
                                 </div>
                             </div>
 
@@ -88,9 +158,9 @@ export default function ResetPasswordForm() {
                                 <Button
                                     type="submit"
                                     disabled={isLoading || !password || !confirmPassword}
-                                    className="h-14 w-full bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-semibold text-lg rounded-2xl shadow-md"
+                                    className="h-14 w-full bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-semibold text-lg rounded-2xl shadow-md cursor-pointer"
                                 >
-                                    {isLoading ? "Updating Password..." : "Reset Password"}
+                                    {isLoading ? "Resetting..." : "Reset Password"}
                                 </Button>
                             </motion.div>
                         </form>

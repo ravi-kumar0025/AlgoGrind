@@ -1,4 +1,9 @@
-export function verifyEmailTemplate({ otp, name = "Developer" }) {
+export function verifyEmailTemplate({
+    otp,
+    name = "Developer",
+    title = "Verify Your Email",
+    description = "Use the verification code below to complete your AlgoGrind account setup.",
+}) {
     return `
     <!DOCTYPE html>
     <html>
@@ -57,7 +62,7 @@ export function verifyEmailTemplate({ otp, name = "Developer" }) {
                         margin-bottom:20px;
                     "
                 >
-                    🛡️
+                    ${emoji}
                 </div>
 
                 <h1
@@ -68,7 +73,7 @@ export function verifyEmailTemplate({ otp, name = "Developer" }) {
                         color:#18181b;
                     "
                 >
-                    Verify Your Email
+                    ${title}
                 </h1>
 
                 <p
@@ -81,8 +86,7 @@ export function verifyEmailTemplate({ otp, name = "Developer" }) {
                 >
                     Hi ${name},
                     <br /><br />
-                    Use the verification code below to complete
-                    your AlgoGrind account setup.
+                    ${description}
                 </p>
 
                 <div

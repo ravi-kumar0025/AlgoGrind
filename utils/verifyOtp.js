@@ -1,3 +1,5 @@
+"use client";
+
 import { emailOtp } from "@/lib/auth-client";
 
 const verifyOTP = async (email, otp) => {

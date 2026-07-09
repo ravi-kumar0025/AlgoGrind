@@ -8,8 +8,6 @@ const sendOTP = async (email, type) => {
         type
     });
 
-    console.log("DATA:", data);
-    console.log("ERROR:", error);
 
     if (error) {
         throw new Error(error.message);

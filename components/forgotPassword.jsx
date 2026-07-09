@@ -4,9 +4,11 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { FiMail, FiArrowLeft, FiCheckCircle } from "react-icons/fi";
+import { FiMail, FiCheckCircle } from "react-icons/fi";
 import Link from "next/link";
 import OTPInput from "./otpInput";
+import { emailOtp } from "@/lib/auth-client";
+import { toast } from "sonner";
 
 export default function ForgotPasswordForm() {
     const [step, setStep] = useState("email");
@@ -16,26 +18,60 @@ export default function ForgotPasswordForm() {
 
     const handleSendOTP = async (e) => {
         e.preventDefault();
-        if (!email) return;
+        if (!email.trim()) {
+            toast.error("Please enter your email address");
+            return;
+        }
 
-        setIsLoading(true);
-        await new Promise(r => setTimeout(r, 1100));
+        try {
+            setIsLoading(true);
+            // Official Better Auth method for password reset OTP
+            const { error } = await emailOtp.requestPasswordReset({ email });
 
-        const masked = email.replace(/(.{2})(.*)(@.*)/, "$1***$3");
-        setMaskedEmail(masked);
-        setStep("otp");
-        setIsLoading(false);
+            if (error) {
+                toast.error(error.message || "Failed to send reset code");
+                return;
+            }
+
+            const masked = email.replace(/(.{2})(.*)(@.*)/, "$1***$3");
+            setMaskedEmail(masked);
+            setStep("otp");
+            toast.success("Reset code sent to your email");
+        } catch (err) {
+            toast.error(err?.message || "Something went wrong. Please try again.");
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const handleVerifyOTP = async (otp) => {
-        setIsLoading(true);
-        await new Promise(r => setTimeout(r, 1300));
-        setStep("success");
-        setIsLoading(false);
+        try {
+            setIsLoading(true);
+            // Verify the OTP is valid before proceeding
+            const { error } = await emailOtp.checkVerificationOtp({
+                email,
+                otp,
+                type: "forget-password",
+            });
 
-        setTimeout(() => {
-            window.location.href = "/auth/reset-password";
-        }, 1600);
+            if (error) {
+                toast.error(error.message || "Invalid or expired code");
+                return;
+            }
+
+            setStep("success");
+            // Pass the email and otp to reset page via sessionStorage so the reset form can use them
+            sessionStorage.setItem("reset_email", email);
+            sessionStorage.setItem("reset_otp", otp);
+
+            setTimeout(() => {
+                window.location.href = "/auth/reset-password";
+            }, 1600);
+        } catch (err) {
+            toast.error(err?.message || "Invalid or expired code");
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -80,9 +116,9 @@ export default function ForgotPasswordForm() {
                                 <Button
                                     type="submit"
                                     disabled={isLoading || !email}
-                                    className="h-14 w-full bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-semibold text-lg rounded-2xl shadow-md"
+                                    className="h-14 w-full bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-semibold text-lg rounded-2xl shadow-md cursor-pointer"
                                 >
-                                    {isLoading ? "Sending OTP..." : "Send OTP"}
+                                    {isLoading ? "Sending..." : "Send Reset Code"}
                                 </Button>
                             </motion.div>
                         </form>
@@ -100,11 +136,9 @@ export default function ForgotPasswordForm() {
                             <h1 className="text-4xl font-black tracking-tighter text-zinc-900">
                                 Verify OTP
                             </h1>
-
                             <p className="mt-3 text-lg text-zinc-600">
                                 We've sent a 6-digit code to
                             </p>
-
                             <p className="font-medium text-zinc-900 mt-1">
                                 {maskedEmail}
                             </p>
@@ -114,6 +148,15 @@ export default function ForgotPasswordForm() {
                             onComplete={handleVerifyOTP}
                             isLoading={isLoading}
                         />
+
+                        <button
+                            type="button"
+                            onClick={handleSendOTP}
+                            disabled={isLoading}
+                            className="text-sm text-indigo-600 hover:text-indigo-700 disabled:opacity-50"
+                        >
+                            Didn't receive a code? Resend
+                        </button>
                     </motion.div>
                 )}
 

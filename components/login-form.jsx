@@ -8,10 +8,65 @@ import { FiMail, FiLock, FiArrowRight, FiEye, FiEyeOff } from "react-icons/fi";
 import { FcGoogle } from "react-icons/fc";
 import { FaGithub } from "react-icons/fa";
 import { useState } from "react";
-
+import { signIn } from "../lib/auth-client";
+import { toast } from "sonner";
 
 export default function LoginForm() {
     const [showPassword, setShowPassword] = useState(false);
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
+
+    const handleGoogleSignIn = async () => {
+        await signIn.social({
+            provider: "google",
+            callbackURL: "/dashboard",
+        });
+    };
+
+    const handleGithubSignIn = async () => {
+        await signIn.social({
+            provider: "github",
+            callbackURL: "/dashboard",
+        });
+    };
+
+    const handleEmailLogin = async (e) => {
+        e.preventDefault();
+        if (!email.trim()) {
+            toast.error("Email is required");
+            return;
+        }
+        if (!password) {
+            toast.error("Password is required");
+            return;
+        }
+
+        try {
+            setIsLoading(true);
+            const { data, error } = await signIn.email({
+                email,
+                password,
+            });
+
+            if (error) {
+                // Better Auth returns 403 when email is not verified
+                if (error.status === 403) {
+                    toast.error("Please verify your email before logging in. Check your inbox.");
+                } else {
+                    toast.error(error.message || "Invalid email or password");
+                }
+                return;
+            }
+
+            toast.success("Welcome back!");
+            window.location.href = "/dashboard";
+        } catch (err) {
+            toast.error(err?.message || "Login failed. Please try again.");
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     return (
         <motion.div
@@ -25,13 +80,15 @@ export default function LoginForm() {
                 <p className="mt-2 text-lg text-zinc-600">Execute your potential.</p>
             </div>
 
-            <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
+            <form className="space-y-6" onSubmit={handleEmailLogin}>
                 <div className="space-y-2">
                     <label className="text-sm font-semibold tracking-widest uppercase text-zinc-500">Email Address</label>
                     <div className="relative">
                         <FiMail className="absolute left-4 top-4 text-zinc-400" size={20} />
                         <Input
                             type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
                             placeholder="dev@algogrind.io"
                             className="h-14 pl-12 text-base rounded-2xl border-zinc-200 focus:border-indigo-500 bg-white"
                         />
@@ -51,9 +108,10 @@ export default function LoginForm() {
                             className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400"
                             size={20}
                         />
-
                         <Input
                             type={showPassword ? "text" : "password"}
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
                             placeholder="••••••••"
                             className="h-14 pl-12 pr-12 text-base rounded-2xl border-zinc-200 focus:border-indigo-500 bg-white"
                         />
@@ -65,13 +123,16 @@ export default function LoginForm() {
                             {showPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
                         </button>
                     </div>
-
                 </div>
 
                 <motion.div whileHover={{ scale: 1.015 }} whileTap={{ scale: 0.985 }}>
-                    <Button className="h-14 w-full bg-linear-to-r from-indigo-600 to-violet-600 text-white font-semibold text-lg rounded-2xl shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-3">
-                        Login
-                        <FiArrowRight size={22} />
+                    <Button
+                        type="submit"
+                        disabled={isLoading}
+                        className="h-14 w-full bg-linear-to-r from-indigo-600 to-violet-600 text-white font-semibold text-lg rounded-2xl shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-3 cursor-pointer"
+                    >
+                        {isLoading ? "Signing in..." : "Login"}
+                        {!isLoading && <FiArrowRight size={22} />}
                     </Button>
                 </motion.div>
             </form>
@@ -86,11 +147,19 @@ export default function LoginForm() {
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-                <Button variant="outline" className="h-14 text-base font-medium rounded-2xl border-zinc-200 hover:bg-zinc-50 flex items-center justify-center gap-3">
+                <Button
+                    variant="outline"
+                    className="h-14 text-base font-medium rounded-2xl border-zinc-200 hover:bg-zinc-50 flex items-center justify-center gap-3 cursor-pointer"
+                    onClick={handleGoogleSignIn}
+                >
                     <FcGoogle size={22} />
                     Google
                 </Button>
-                <Button variant="outline" className="h-14 text-base font-medium rounded-2xl border-zinc-200 hover:bg-zinc-50 flex items-center justify-center gap-3">
+                <Button
+                    variant="outline"
+                    className="h-14 text-base font-medium rounded-2xl border-zinc-200 hover:bg-zinc-50 flex items-center justify-center gap-3 cursor-pointer"
+                    onClick={handleGithubSignIn}
+                >
                     <FaGithub size={22} />
                     GitHub
                 </Button>
