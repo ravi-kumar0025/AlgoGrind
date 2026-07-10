@@ -56,14 +56,6 @@ export function verifyEmailTemplate({
                     text-align:center;
                 "
             >
-                <div
-                    style="
-                        font-size:64px;
-                        margin-bottom:20px;
-                    "
-                >
-                    ${emoji}
-                </div>
 
                 <h1
                     style="

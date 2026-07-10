@@ -7,14 +7,15 @@ export async function sendMail({
     html,
 }) {
     try {
-        await transporter.verify();
-        console.log("SMTP READY");
+        console.time("mail send")
+        console.log("Sending OTP to:", to);
         const info = await transporter.sendMail({
             from: `"AlgoGrind" <${process.env.SMTP_USER}>`,
             to,
             subject,
             html,
         });
+        console.timeEnd("mail send")
         console.log("Email sent:", info.messageId);
 
         return info;

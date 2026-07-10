@@ -1,4 +1,4 @@
-import ForgotPassword from "../../../components/forgotPassword"
+import ForgotPassword from "@/components/forgotPassword";
 
 export default function forgotPassword(){
     return(
