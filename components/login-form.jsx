@@ -18,17 +18,25 @@ export default function LoginForm() {
     const [isLoading, setIsLoading] = useState(false);
 
     const handleGoogleSignIn = async () => {
-        await signIn.social({
-            provider: "google",
-            callbackURL: "/dashboard",
-        });
+        try {
+            await signIn.social({
+                provider: "google",
+                callbackURL: "/dashboard",
+            });
+        } catch (error) {
+            toast.error(error?.message || "Google sign-in failed");
+        }
     };
 
     const handleGithubSignIn = async () => {
-        await signIn.social({
-            provider: "github",
-            callbackURL: "/dashboard",
-        });
+        try {
+            await signIn.social({
+                provider: "github",
+                callbackURL: "/dashboard",
+            });
+        } catch (error) {
+            toast.error(error?.message || "GitHub sign-in failed");
+        }
     };
 
     const handleEmailLogin = async (e) => {
@@ -76,13 +84,13 @@ export default function LoginForm() {
             className="w-full space-y-8"
         >
             <div>
-                <h1 className="text-4xl font-black tracking-tighter text-zinc-900">AlgoGrind</h1>
-                <p className="mt-2 text-lg text-zinc-600">Execute your potential.</p>
+                <h1 className="text-5xl font-black tracking-tighter text-zinc-900">AlgoGrind</h1>
+                <p className="mt-3 text-xl text-zinc-600">Execute your potential.</p>
             </div>
 
             <form className="space-y-6" onSubmit={handleEmailLogin}>
                 <div className="space-y-2">
-                    <label className="text-sm font-semibold tracking-widest uppercase text-zinc-500">Email Address</label>
+                    <label className="text-base font-semibold tracking-widest uppercase text-zinc-500">Email Address</label>
                     <div className="relative">
                         <FiMail className="absolute left-4 top-4 text-zinc-400" size={20} />
                         <Input
@@ -90,15 +98,15 @@ export default function LoginForm() {
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             placeholder="dev@algogrind.io"
-                            className="h-14 pl-12 text-base rounded-2xl border-zinc-200 focus:border-indigo-500 bg-white"
+                            className="h-14 pl-12 text-lg rounded-2xl border-zinc-200 focus:border-indigo-500 bg-white"
                         />
                     </div>
                 </div>
 
                 <div className="space-y-2">
                     <div className="flex justify-between">
-                        <label className="text-sm font-semibold tracking-widest uppercase text-zinc-500">Password</label>
-                        <Link href="/auth/forgot-password" className="text-sm text-indigo-600 hover:text-indigo-700 font-medium">
+                        <label className="text-base font-semibold tracking-widest uppercase text-zinc-500">Password</label>
+                        <Link href="/auth/forgot-password" className="text-base text-indigo-600 hover:text-indigo-700 font-medium">
                             Forgot Password?
                         </Link>
                     </div>
@@ -113,7 +121,7 @@ export default function LoginForm() {
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             placeholder="••••••••"
-                            className="h-14 pl-12 pr-12 text-base rounded-2xl border-zinc-200 focus:border-indigo-500 bg-white"
+                            className="h-14 pl-12 pr-12 text-lg rounded-2xl border-zinc-200 focus:border-indigo-500 bg-white"
                         />
                         <button
                             type="button"
@@ -129,7 +137,7 @@ export default function LoginForm() {
                     <Button
                         type="submit"
                         disabled={isLoading}
-                        className="h-14 w-full bg-linear-to-r from-indigo-600 to-violet-600 text-white font-semibold text-lg rounded-2xl shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-3 cursor-pointer"
+                        className="h-14 w-full bg-linear-to-r from-indigo-600 to-violet-600 text-white font-semibold text-xl rounded-2xl shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-3 cursor-pointer"
                     >
                         {isLoading ? "Signing in..." : "Login"}
                         {!isLoading && <FiArrowRight size={22} />}
@@ -148,16 +156,18 @@ export default function LoginForm() {
 
             <div className="grid grid-cols-2 gap-4">
                 <Button
+                    type="button"
                     variant="outline"
-                    className="h-14 text-base font-medium rounded-2xl border-zinc-200 hover:bg-zinc-50 flex items-center justify-center gap-3 cursor-pointer"
+                    className="h-14 text-lg font-medium rounded-2xl border-zinc-200 hover:bg-zinc-50 flex items-center justify-center gap-3 cursor-pointer"
                     onClick={handleGoogleSignIn}
                 >
                     <FcGoogle size={22} />
                     Google
                 </Button>
                 <Button
+                    type="button"
                     variant="outline"
-                    className="h-14 text-base font-medium rounded-2xl border-zinc-200 hover:bg-zinc-50 flex items-center justify-center gap-3 cursor-pointer"
+                    className="h-14 text-lg font-medium rounded-2xl border-zinc-200 hover:bg-zinc-50 flex items-center justify-center gap-3 cursor-pointer"
                     onClick={handleGithubSignIn}
                 >
                     <FaGithub size={22} />
@@ -165,7 +175,7 @@ export default function LoginForm() {
                 </Button>
             </div>
 
-            <p className="text-center text-base text-zinc-600">
+            <p className="text-center text-lg text-zinc-600">
                 New to the grind?{" "}
                 <Link href="/auth/signup" className="font-semibold text-indigo-600 hover:text-indigo-700">
                     Create Account

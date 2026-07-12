@@ -53,7 +53,7 @@ export default function OTPInput({ onComplete, isLoading }) {
                         onChange={(e) => handleChange(index, e.target.value)}
                         onKeyDown={(e) => handleKeyDown(index, e)}
                         onPaste={handlePaste}
-                        className="w-12 h-14 text-center text-2xl font-semibold border border-zinc-200 focus:border-indigo-500 rounded-2xl focus:ring-1 focus:ring-indigo-200 bg-white transition-all"
+                        className="w-12 h-14 text-center text-3xl font-semibold border border-zinc-200 focus:border-indigo-500 rounded-2xl focus:ring-1 focus:ring-indigo-200 bg-white transition-all"
                     />
                 ))}
             </div>
@@ -62,8 +62,8 @@ export default function OTPInput({ onComplete, isLoading }) {
                 <button
                     onClick={() => onComplete(otp.join(""))}
                     disabled={isLoading || otp.some(d => d === "")}
-                    className="h-14 w-full bg-linear-to-r from-indigo-600 to-violet-600 text-white font-semibold text-lg rounded-2xl shadow-md hover:shadow-lg disabled:opacity-50 transition-all"
-                >
+                className="h-14 w-full bg-linear-to-r from-indigo-600 to-violet-600 text-white font-semibold text-xl rounded-2xl shadow-md hover:shadow-lg disabled:opacity-50 transition-all"
+            >
                     {isLoading ? "Verifying..." : "Verify OTP"}
                 </button>
             </motion.div>

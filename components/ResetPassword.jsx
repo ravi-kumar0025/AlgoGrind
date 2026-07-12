@@ -16,25 +16,33 @@ export default function ResetPasswordForm() {
     const [showConfirm, setShowConfirm] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
-    const [resetEmail, setResetEmail] = useState("");
-    const [resetOtp, setResetOtp] = useState("");
+    const [resetEmail, setResetEmail] = useState(() => {
+        if (typeof window === "undefined") {
+            return "";
+        }
+
+        return sessionStorage.getItem("reset_email") || "";
+    });
+    const [resetOtp, setResetOtp] = useState(() => {
+        if (typeof window === "undefined") {
+            return "";
+        }
+
+        return sessionStorage.getItem("reset_otp") || "";
+    });
 
     useEffect(() => {
-        // Retrieve the verified email and OTP passed from the forgot-password flow
-        const email = sessionStorage.getItem("reset_email");
-        const otp = sessionStorage.getItem("reset_otp");
-
-        if (!email || !otp) {
-            toast.error("Invalid session. Please restart the password reset flow.");
-            setTimeout(() => {
-                window.location.href = "/auth/forgot-password";
-            }, 2000);
+        if (resetEmail && resetOtp) {
             return;
         }
 
-        setResetEmail(email);
-        setResetOtp(otp);
-    }, []);
+        toast.error("Invalid session. Please restart the password reset flow.");
+        const timer = setTimeout(() => {
+            window.location.href = "/auth/forgot-password";
+        }, 2000);
+
+        return () => clearTimeout(timer);
+    }, [resetEmail, resetOtp]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -57,7 +65,6 @@ export default function ResetPasswordForm() {
 
         try {
             setIsLoading(true);
-            // Official Better Auth method for resetting password with OTP
             const { error } = await emailOtp.resetPassword({
                 email: resetEmail,
                 otp: resetOtp,
@@ -69,7 +76,6 @@ export default function ResetPasswordForm() {
                 return;
             }
 
-            // Clear session storage after successful reset
             sessionStorage.removeItem("reset_email");
             sessionStorage.removeItem("reset_otp");
 
@@ -88,8 +94,11 @@ export default function ResetPasswordForm() {
 
     return (
         <div className="w-full max-w-md">
-            <Link href="/auth/login" className="inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-zinc-900 mb-10 transition-colors">
-                ← Back to Login
+            <Link
+                href="/auth/login"
+                className="inline-flex items-center gap-2 text-base text-zinc-500 hover:text-zinc-900 mb-10 transition-colors"
+            >
+                {"<-"} Back to Login
             </Link>
 
             <AnimatePresence mode="wait">
@@ -102,23 +111,27 @@ export default function ResetPasswordForm() {
                         className="space-y-8"
                     >
                         <div>
-                            <h1 className="text-4xl font-black tracking-tighter text-zinc-900">Reset Password</h1>
-                            <p className="mt-3 text-lg text-zinc-600">
+                            <h1 className="text-5xl font-black tracking-tighter text-zinc-900">
+                                Reset Password
+                            </h1>
+                            <p className="mt-3 text-xl text-zinc-600">
                                 Create a new strong password for your account.
                             </p>
                         </div>
 
                         <form onSubmit={handleSubmit} className="space-y-6">
                             <div className="space-y-2">
-                                <label className="text-sm font-semibold tracking-widest uppercase text-zinc-500">NEW PASSWORD</label>
+                                <label className="text-base font-semibold tracking-widest uppercase text-zinc-500">
+                                    New Password
+                                </label>
                                 <div className="relative">
                                     <FiLock className="absolute left-4 top-4 text-zinc-400" size={20} />
                                     <Input
                                         type={showPassword ? "text" : "password"}
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
-                                        placeholder="••••••••"
-                                        className="h-14 pl-12 pr-12 text-base rounded-2xl border-zinc-200 focus:border-indigo-500"
+                                        placeholder="Password"
+                                        className="h-14 pl-12 pr-12 text-lg rounded-2xl border-zinc-200 focus:border-indigo-500 bg-white"
                                         required
                                         minLength={8}
                                     />
@@ -133,15 +146,17 @@ export default function ResetPasswordForm() {
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-sm font-semibold tracking-widest uppercase text-zinc-500">CONFIRM NEW PASSWORD</label>
+                                <label className="text-base font-semibold tracking-widest uppercase text-zinc-500">
+                                    Confirm Password
+                                </label>
                                 <div className="relative">
                                     <FiLock className="absolute left-4 top-4 text-zinc-400" size={20} />
                                     <Input
                                         type={showConfirm ? "text" : "password"}
                                         value={confirmPassword}
                                         onChange={(e) => setConfirmPassword(e.target.value)}
-                                        placeholder="••••••••"
-                                        className="h-14 pl-12 pr-12 text-base rounded-2xl border-zinc-200 focus:border-indigo-500"
+                                        placeholder="Confirm password"
+                                        className="h-14 pl-12 pr-12 text-lg rounded-2xl border-zinc-200 focus:border-indigo-500 bg-white"
                                         required
                                     />
                                     <button
@@ -158,7 +173,7 @@ export default function ResetPasswordForm() {
                                 <Button
                                     type="submit"
                                     disabled={isLoading || !password || !confirmPassword}
-                                    className="h-14 w-full bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-semibold text-lg rounded-2xl shadow-md cursor-pointer"
+                                    className="h-14 w-full bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-semibold text-xl rounded-2xl shadow-md cursor-pointer"
                                 >
                                     {isLoading ? "Resetting..." : "Reset Password"}
                                 </Button>
@@ -173,8 +188,12 @@ export default function ResetPasswordForm() {
                         className="flex flex-col items-center justify-center py-20 text-center"
                     >
                         <FiCheckCircle className="text-emerald-500 mb-6" size={80} />
-                        <h2 className="text-3xl font-semibold text-zinc-900">Password Reset Successful</h2>
-                        <p className="mt-4 text-zinc-600">Redirecting you to login...</p>
+                        <h2 className="text-3xl font-semibold text-zinc-900">
+                            Password Reset Successful
+                        </h2>
+                        <p className="mt-4 text-zinc-600">
+                            Redirecting you to login...
+                        </p>
                     </motion.div>
                 )}
             </AnimatePresence>

@@ -1,8 +1,6 @@
 export function verifyEmailTemplate({
     otp,
     name = "Developer",
-    title = "Verify Your Email",
-    description = "Use the verification code below to complete your AlgoGrind account setup.",
 }) {
     return `
     <!DOCTYPE html>
@@ -12,118 +10,163 @@ export function verifyEmailTemplate({
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Verify Your Email</title>
     </head>
+
     <body
         style="
             margin:0;
-            padding:40px 20px;
-            background:#f4f4f5;
-            font-family:Inter,Arial,sans-serif;
+            padding:32px 16px;
+            background:#f8fafc;
+            font-family:Arial,sans-serif;
         "
     >
-        <div
-            style="
-                max-width:600px;
-                margin:auto;
-                background:#ffffff;
-                border-radius:24px;
-                overflow:hidden;
-                box-shadow:0 10px 30px rgba(0,0,0,0.06);
-            "
+        <table
+            width="100%"
+            cellpadding="0"
+            cellspacing="0"
         >
+            <tr>
+                <td align="center">
 
-            <div
-                style="
-                    background:#f8fafc;
-                    padding:40px;
-                    text-align:center;
-                "
-            >
-                <h2
-                    style="
-                        margin:0;
-                        color:#4f46e5;
-                        font-size:28px;
-                        font-weight:800;
-                    "
-                >
-                    AlgoGrind
-                </h2>
-            </div>
+                    <table
+                        width="600"
+                        cellpadding="0"
+                        cellspacing="0"
+                        style="
+                            background:#ffffff;
+                            border-radius:20px;
+                            overflow:hidden;
+                            border:1px solid #e5e7eb;
+                        "
+                    >
 
-            <div
-                style="
-                    padding:48px 40px;
-                    text-align:center;
-                "
-            >
+                        <tr>
+                            <td
+                                align="center"
+                                style="
+                                    padding:32px;
+                                    background:linear-gradient(135deg,#4f46e5,#7c3aed);
+                                "
+                            >
+                                <h1
+                                    style="
+                                        margin:0;
+                                        color:white;
+                                        font-size:32px;
+                                        font-weight:800;
+                                    "
+                                >
+                                    AlgoGrind
+                                </h1>
 
-                <h1
-                    style="
-                        margin:0;
-                        font-size:36px;
-                        font-weight:800;
-                        color:#18181b;
-                    "
-                >
-                    ${title}
-                </h1>
+                                <p
+                                    style="
+                                        margin-top:8px;
+                                        color:#e0e7ff;
+                                        font-size:14px;
+                                    "
+                                >
+                                    Practice • Learn • Progress
+                                </p>
+                            </td>
+                        </tr>
 
-                <p
-                    style="
-                        margin-top:18px;
-                        color:#52525b;
-                        font-size:16px;
-                        line-height:1.7;
-                    "
-                >
-                    Hi ${name},
-                    <br /><br />
-                    ${description}
-                </p>
+                        <tr>
+                            <td
+                                style="
+                                    padding:40px;
+                                    text-align:center;
+                                "
+                            >
+                                <h2
+                                    style="
+                                        margin:0;
+                                        color:#111827;
+                                        font-size:28px;
+                                    "
+                                >
+                                    Verify Your Email
+                                </h2>
 
-                <div
-                    style="
-                        margin:36px auto;
-                        width:max-content;
-                        background:#eef2ff;
-                        border:2px solid #c7d2fe;
-                        border-radius:18px;
-                        padding:20px 32px;
-                        color:#4338ca;
-                        font-size:36px;
-                        font-weight:800;
-                        letter-spacing:10px;
-                    "
-                >
-                    ${otp}
-                </div>
+                                <p
+                                    style="
+                                        margin-top:20px;
+                                        color:#4b5563;
+                                        font-size:16px;
+                                        line-height:1.8;
+                                    "
+                                >
+                                    Hi ${name},
+                                    <br /><br />
+                                    Welcome to AlgoGrind.
+                                    Use the verification code below to
+                                    complete your account setup.
+                                </p>
 
-                <p
-                    style="
-                        color:#71717a;
-                        font-size:15px;
-                    "
-                >
-                    This code will expire in
-                    <strong>10 minutes</strong>.
-                </p>
-            </div>
+                                <div
+                                    style="
+                                        margin:32px auto;
+                                        display:inline-block;
+                                        padding:18px 32px;
+                                        background:#eef2ff;
+                                        border:1px solid #c7d2fe;
+                                        border-radius:16px;
+                                        font-size:34px;
+                                        font-weight:800;
+                                        letter-spacing:8px;
+                                        color:#4338ca;
+                                    "
+                                >
+                                    ${otp}
+                                </div>
 
-            <div
-                style="
-                    border-top:1px solid #e4e4e7;
-                    padding:24px;
-                    text-align:center;
-                    color:#71717a;
-                    font-size:14px;
-                    line-height:1.7;
-                "
-            >
-                If you didn't request this email,
-                you can safely ignore it.
-            </div>
+                                <p
+                                    style="
+                                        margin-top:10px;
+                                        color:#6b7280;
+                                        font-size:14px;
+                                    "
+                                >
+                                    This verification code expires in
+                                    <strong>10 minutes</strong>.
+                                </p>
 
-        </div>
+                                <p
+                                    style="
+                                        margin-top:30px;
+                                        color:#6b7280;
+                                        font-size:14px;
+                                        line-height:1.7;
+                                    "
+                                >
+                                    For security reasons, never share this code
+                                    with anyone.
+                                </p>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td
+                                style="
+                                    border-top:1px solid #e5e7eb;
+                                    padding:24px;
+                                    text-align:center;
+                                    color:#6b7280;
+                                    font-size:13px;
+                                    line-height:1.7;
+                                "
+                            >
+                                If you did not request this email,
+                                you can safely ignore it.
+                                <br />
+                                © 2026 AlgoGrind. All rights reserved.
+                            </td>
+                        </tr>
+
+                    </table>
+
+                </td>
+            </tr>
+        </table>
     </body>
     </html>
     `;

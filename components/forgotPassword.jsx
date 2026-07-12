@@ -18,6 +18,7 @@ export default function ForgotPasswordForm() {
 
     const handleSendOTP = async (e) => {
         e.preventDefault();
+
         if (!email.trim()) {
             toast.error("Please enter your email address");
             return;
@@ -25,7 +26,6 @@ export default function ForgotPasswordForm() {
 
         try {
             setIsLoading(true);
-            // Official Better Auth method for password reset OTP
             const { error } = await emailOtp.requestPasswordReset({ email });
 
             if (error) {
@@ -47,7 +47,6 @@ export default function ForgotPasswordForm() {
     const handleVerifyOTP = async (otp) => {
         try {
             setIsLoading(true);
-            // Verify the OTP is valid before proceeding
             const { error } = await emailOtp.checkVerificationOtp({
                 email,
                 otp,
@@ -60,7 +59,6 @@ export default function ForgotPasswordForm() {
             }
 
             setStep("success");
-            // Pass the email and otp to reset page via sessionStorage so the reset form can use them
             sessionStorage.setItem("reset_email", email);
             sessionStorage.setItem("reset_otp", otp);
 
@@ -76,8 +74,11 @@ export default function ForgotPasswordForm() {
 
     return (
         <div className="w-full max-w-md">
-            <Link href="/auth/login" className="inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-zinc-900 mb-10 transition-colors">
-                ← Back to Login
+            <Link
+                href="/auth/login"
+                className="inline-flex items-center gap-2 text-base text-zinc-500 hover:text-zinc-900 mb-10 transition-colors"
+            >
+                {"<-"} Back to Login
             </Link>
 
             <AnimatePresence mode="wait">
@@ -90,15 +91,19 @@ export default function ForgotPasswordForm() {
                         className="space-y-8"
                     >
                         <div>
-                            <h1 className="text-4xl font-black tracking-tighter text-zinc-900">Forgot Password?</h1>
-                            <p className="mt-3 text-lg text-zinc-600">
-                                Enter your email address and we'll send you a verification code.
+                            <h1 className="text-5xl font-black tracking-tighter text-zinc-900">
+                                Forgot Password?
+                            </h1>
+                            <p className="mt-3 text-xl text-zinc-600">
+                                Enter your email address and we&apos;ll send you a verification code.
                             </p>
                         </div>
 
                         <form onSubmit={handleSendOTP} className="space-y-6">
                             <div className="space-y-2">
-                                <label className="text-sm font-semibold tracking-widest uppercase text-zinc-500">EMAIL ADDRESS</label>
+                                <label className="text-base font-semibold tracking-widest uppercase text-zinc-500">
+                                    Email Address
+                                </label>
                                 <div className="relative">
                                     <FiMail className="absolute left-4 top-4 text-zinc-400" size={20} />
                                     <Input
@@ -106,7 +111,7 @@ export default function ForgotPasswordForm() {
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
                                         placeholder="you@algogrind.io"
-                                        className="h-14 pl-12 text-base rounded-2xl border-zinc-200 focus:border-indigo-500"
+                                        className="h-14 pl-12 text-lg rounded-2xl border-zinc-200 focus:border-indigo-500 bg-white"
                                         required
                                     />
                                 </div>
@@ -116,7 +121,7 @@ export default function ForgotPasswordForm() {
                                 <Button
                                     type="submit"
                                     disabled={isLoading || !email}
-                                    className="h-14 w-full bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-semibold text-lg rounded-2xl shadow-md cursor-pointer"
+                                    className="h-14 w-full bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-semibold text-xl rounded-2xl shadow-md cursor-pointer"
                                 >
                                     {isLoading ? "Sending..." : "Send Reset Code"}
                                 </Button>
@@ -133,29 +138,26 @@ export default function ForgotPasswordForm() {
                         className="space-y-8"
                     >
                         <div>
-                            <h1 className="text-4xl font-black tracking-tighter text-zinc-900">
+                            <h1 className="text-5xl font-black tracking-tighter text-zinc-900">
                                 Verify OTP
                             </h1>
-                            <p className="mt-3 text-lg text-zinc-600">
-                                We've sent a 6-digit code to
+                            <p className="mt-3 text-xl text-zinc-600">
+                                We&apos;ve sent a 6-digit code to
                             </p>
-                            <p className="font-medium text-zinc-900 mt-1">
+                            <p className="mt-1 text-lg font-medium text-zinc-900">
                                 {maskedEmail}
                             </p>
                         </div>
 
-                        <OTPInput
-                            onComplete={handleVerifyOTP}
-                            isLoading={isLoading}
-                        />
+                        <OTPInput onComplete={handleVerifyOTP} isLoading={isLoading} />
 
                         <button
                             type="button"
                             onClick={handleSendOTP}
                             disabled={isLoading}
-                            className="text-sm text-indigo-600 hover:text-indigo-700 disabled:opacity-50"
+                            className="text-base text-indigo-600 hover:text-indigo-700 disabled:opacity-50"
                         >
-                            Didn't receive a code? Resend
+                            Didn&apos;t receive a code? Resend
                         </button>
                     </motion.div>
                 )}
@@ -167,8 +169,12 @@ export default function ForgotPasswordForm() {
                         className="flex flex-col items-center justify-center py-16 text-center"
                     >
                         <FiCheckCircle className="text-emerald-500 mb-6" size={80} />
-                        <h2 className="text-3xl font-semibold text-zinc-900">Verification Successful</h2>
-                        <p className="mt-4 text-zinc-600">Redirecting you to reset your password...</p>
+                        <h2 className="text-3xl font-semibold text-zinc-900">
+                            Verification Successful
+                        </h2>
+                        <p className="mt-4 text-zinc-600">
+                            Redirecting you to reset your password...
+                        </p>
                     </motion.div>
                 )}
             </AnimatePresence>

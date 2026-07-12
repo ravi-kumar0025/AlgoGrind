@@ -4,69 +4,77 @@ import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
 import User from "@/models/user.models";
+import uploadOnCloudinary from "@/utils/upload-on-cloudinary";
 
-export async function completeOnboarding({ username, avatar }) {
-    console.log("\n========== ONBOARDING STARTED ==========");
-    console.log("📥 Received payload:", { username, avatar: avatar || "(none)" });
-
+export async function completeOnboarding({
+    username,
+    avatar,
+}) {
     try {
-        await connectDB();
-        console.log("✅ DB connected");
+        if (!username?.trim()) {
+            return {
+                success: false,
+                message: "Username is required",
+            };
+        }
 
-        const session = await auth.api.getSession({
-            headers: await headers(),
-        });
+        await connectDB();
+
+        const session =
+            await auth.api.getSession({
+                headers: await headers(),
+            });
 
         if (!session?.user) {
-            console.warn("🚫 No session found — unauthorized");
-            return { success: false, message: "Unauthorized" };
+            return {
+                success: false,
+                message: "Unauthorized",
+            };
         }
 
-        console.log("👤 Session user:", {
-            id: session.user.id,
-            email: session.user.email,
-            name: session.user.name,
-        });
+        const existingUser =
+            await User.findOne({
+                username: username
+                    .trim()
+                    .toLowerCase(),
+            });
 
-        // Check username collision
-        const existingUsername = await User.findOne({ username });
-        if (existingUsername) {
-            console.warn(`⚠️  Username "${username}" is already taken`);
-            return { success: false, message: "Username already taken" };
-        }
-        console.log(`✅ Username "${username}" is available`);
-
-        // Check if profile already exists for this user
-        const existingUser = await User.findOne({ userId: session.user.id });
         if (existingUser) {
-            console.warn("⚠️  Profile already exists for userId:", session.user.id);
-            return { success: false, message: "Profile already exists" };
+            return {
+                success: false,
+                message:
+                    "Username already taken",
+            };
         }
 
-        // Create the profile
-        const newUser = await User.create({
+        let avatarUrl = "";
+
+        if (avatar && avatar.size > 0) {
+            const uploaded = await uploadOnCloudinary(avatar);
+            avatarUrl = uploaded.secure_url;
+        }
+        await User.create({
             userId: session.user.id,
-            username,
-            avatar: avatar || "",
+            username: username.trim().toLowerCase(),
+            avatar: avatarUrl,
             role: "user",
             onboardingCompleted: true,
         });
 
-        console.log("🎉 Profile created successfully:", {
-            _id: newUser._id,
-            userId: newUser.userId,
-            username: newUser.username,
-            avatar: newUser.avatar || "(none)",
-            role: newUser.role,
-            onboardingCompleted: newUser.onboardingCompleted,
-            createdAt: newUser.createdAt,
-        });
-        console.log("========== ONBOARDING COMPLETE ==========\n");
-
-        return { success: true, message: "Profile created" };
-
+        return {
+            success: true,
+            message:
+                "Profile created successfully",
+        };
     } catch (error) {
-        console.error("❌ Onboarding error:", error);
-        return { success: false, message: "Something went wrong" };
+        console.error(
+            "ONBOARDING ERROR:",error
+        );
+
+        return {
+            success: false,
+            message:
+                "Failed to complete onboarding",
+        };
     }
 }
