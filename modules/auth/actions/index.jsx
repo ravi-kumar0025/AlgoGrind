@@ -59,6 +59,7 @@ export async function completeOnboarding({
             avatar: avatarUrl,
             role: "user",
             onboardingCompleted: true,
+            email:session.user.email,
         });
 
         return {
